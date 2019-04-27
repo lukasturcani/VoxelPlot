@@ -9,6 +9,12 @@ function render() {
     scene.userData.outline.render(scene, scene.userData.camera);
 }
 
+function animate() {
+    requestAnimationFrame(animate);
+    scene.userData.controls.update();
+}
+
+
 /**
  * Fits voxel grid into camera view.
  * @author { smcllns }
@@ -97,5 +103,5 @@ function drawVoxels(voxels, elementId) {
         scene.userData.camera.updateProjectionMatrix();
         render();
     }
-
+    animate();
 }
