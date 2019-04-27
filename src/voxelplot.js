@@ -36,6 +36,9 @@ function autoFitTo( boundingBox, camera, controls ) {
 
 function drawVoxels(voxels, elementId) {
 
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xFFFFFF);
+
     let voxelGeometry = new THREE.BoxGeometry(1, 1, 1);
     let voxelGridGeometry = new THREE.Geometry();
     let matrix = new THREE.Matrix4();
@@ -48,9 +51,8 @@ function drawVoxels(voxels, elementId) {
     let material = new THREE.MeshToonMaterial({color: 0x00FF00});
     var voxelGridMesh = new THREE.Mesh( voxelGridGeometry, material );
 
+    scene.add(voxelGridMesh);
 
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xFFFFFF);
 
     let container = document.getElementById(elementId);
     let aspectRatio = container.clientWidth / container.clientHeight;
@@ -90,11 +92,9 @@ function drawVoxels(voxels, elementId) {
 
     window.addEventListener('resize', onWindowResize, false)
     function onWindowResize() {
-        for (let scene of scenes) {
-            scene.userData.renderer.setSize(scene.userData.container.clientWidth, scene.userData.container.clientHeight);
-            scene.userData.camera.aspect = scene.userData.container.clientWidth / scene.userData.container.clientHeight;
-            scene.userData.camera.updateProjectionMatrix();
-        }
+        scene.userData.renderer.setSize(scene.userData.container.clientWidth, scene.userData.container.clientHeight);
+        scene.userData.camera.aspect = scene.userData.container.clientWidth / scene.userData.container.clientHeight;
+        scene.userData.camera.updateProjectionMatrix();
         render();
     }
 
