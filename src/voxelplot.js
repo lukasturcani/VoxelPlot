@@ -1,20 +1,3 @@
-let scene;
-
-function render() {
-    scene.userData.light.position.copy(scene.userData.camera.position.clone().normalize());
-    scene.userData.light.position.z *= 2;
-    scene.userData.light.position.x *= 5;
-    scene.userData.light.position.normalize();
-    scene.userData.renderer.render(scene, scene.userData.camera);
-    scene.userData.outline.render(scene, scene.userData.camera);
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-    scene.userData.controls.update();
-}
-
-
 /**
  * Fits voxel grid into camera view.
  * @author { smcllns }
@@ -39,12 +22,15 @@ function autoFitTo( boundingBox, camera, controls ) {
 
 }
 
-
+/**
+ * Draws the voxel grid.
+ */
 function drawVoxels(voxels, elementId) {
-
-    scene = new THREE.Scene();
+    // Set up scene.
+    let scene = new THREE.Scene();
     scene.background = new THREE.Color(0xFFFFFF);
 
+    // Create voxels.
     let voxelGeometry = new THREE.BoxGeometry(1, 1, 1);
     let voxelGridGeometry = new THREE.Geometry();
     let matrix = new THREE.Matrix4();
@@ -55,53 +41,91 @@ function drawVoxels(voxels, elementId) {
         }
     }
     let material = new THREE.MeshToonMaterial({color: 0x00FF00});
-    var voxelGridMesh = new THREE.Mesh( voxelGridGeometry, material );
+    var voxelGridMesh = new THREE.Mesh(voxelGridGeometry, material);
 
     scene.add(voxelGridMesh);
 
-
+    // Set up camera.
     let container = document.getElementById(elementId);
     let aspectRatio = container.clientWidth / container.clientHeight;
-    scene.userData.container = container;
 
-    let camera = new THREE.PerspectiveCamera(20, aspectRatio, 0.1, 10000);
-    scene.userData.camera = camera;
+    let camera = new THREE.PerspectiveCamera(
+        fov=20,
+        aspect=aspectRatio,
+        near=0.1,
+        far=10000
+    );
 
-    let light = new THREE.DirectionalLight(0xFFFFFF);
-    light.position.copy(camera.position.clone().normalize());
-    light.position.z *= 2;
-    light.position.x *= 5;
-    light.position.normalize();
-    light.target.position.copy(new THREE.Vector3(0, 0, 0));
+    // Set up lights.
+    let light = new THREE.PointLight(0xFFFFFF, 0.2);
+    light.position.set(50, 0, 0);
     scene.add(light);
-    scene.userData.light = light;
 
-    let renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+    light = new THREE.PointLight(0xFFFFFF, 0.2);
+    light.position.set(-50, 0, 0);
+    scene.add(light);
+
+    light = new THREE.PointLight(0xFFFFFF, 0.2);
+    light.position.set(0, 50, 0);
+    scene.add(light);
+
+    light = new THREE.PointLight(0xFFFFFF, 0.2);
+    light.position.set(0, -50, 0);
+    scene.add(light);
+
+    light = new THREE.PointLight(0xFFFFFF, 0.2);
+    light.position.set(0, 0, 50);
+    scene.add(light);
+
+    light = new THREE.PointLight(0xFFFFFF, 0.2);
+    light.position.set(50, 0, -50);
+    scene.add(light);
+
+    // Set up renderer.
+    let renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true
+    });
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
-    scene.userData.renderer = renderer;
+    let outline = new THREE.OutlineEffect(renderer);
 
+    function render() {
+        renderer.render(scene, camera);
+        outline.render(scene, camera);
+    }
+
+    // Set up camera controls.
     controls = new THREE.TrackballControls(camera, container);
     controls.rotateSpeed = 3.0;
     controls.zoomSpeed = 3;
     controls.panSpeed = 2;
     controls.staticMoving = true;
     controls.addEventListener('change', render);
-    scene.userData.controls = controls;
 
-    let outline = new THREE.OutlineEffect(renderer);
-    scene.userData.outline = outline;
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+    }
 
+    // Initialize view.
     voxelGridGeometry.computeBoundingBox()
     autoFitTo(voxelGridGeometry.boundingBox.clone(), camera, controls);
     render();
 
+    // Manage window resizes.
     window.addEventListener('resize', onWindowResize, false)
     function onWindowResize() {
-        scene.userData.renderer.setSize(scene.userData.container.clientWidth, scene.userData.container.clientHeight);
-        scene.userData.camera.aspect = scene.userData.container.clientWidth / scene.userData.container.clientHeight;
-        scene.userData.camera.updateProjectionMatrix();
+        aspectRatio = container.clientWidth / container.clientHeight
+        renderer.setSize(
+            width=container.clientWidth,
+            height=container.clientHeight
+        );
+        camera.aspect = aspectRatio;
+        camera.updateProjectionMatrix();
         render();
     }
+
+    // Run.
     animate();
 }
