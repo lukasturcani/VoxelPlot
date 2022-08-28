@@ -9,16 +9,14 @@ The file must be in the following format
 .. code-block:: javascript
 
     [
-        [state, [x, y, z]],
-        [state, [x, y, z]],
-        [state, [x, y, z]]
+        [x, y, z],
+        [x, y, z],
+        [x, y, z]
     ]
 
-Each ``[state, [x, y, z]]`` represents a voxel on the grid to be
-rendered. The ``state`` can be ``0`` or ``1`` to indicate whether the
-voxel should be rendered or not. The ``[x, y, z]`` represent the
-position of the voxel in the grid. You can see an example in
-``example_file.json``.
+Each ``[x, y, z]`` represents a voxel on the grid to be rendered. The
+``[x, y, z]`` represents the position of the voxel in the grid. You
+can see an example in ``example_file.json``.
 
 Here is an example from a different file:
 
